@@ -1,3 +1,15 @@
-*.FASL
+# NeoVim
+.*.swp
+
+# Lisp
 *.fasl
-*.lisp-temp
+
+# Emacs
+*~
+
+# spec files
+*.spec
+
+# python
+__pycache__
+tests.py
