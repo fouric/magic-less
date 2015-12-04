@@ -12,6 +12,17 @@ def getWindowToPutLineInto(index, height):
     return int(index / height)
 def getLinesToDisplay(lines, height, startingIndex):
     return min(len(lines) - startingIndex, height)
+def tabConvert(line):
+    result = ''
+    screenIndex = 0
+    for charIndex in range(len(line)):
+        if line[charIndex] == '\t':
+            result += ' ' * (8 - screenIndex % 8)
+            screenIndex += 8 - screenIndex % 8
+        else:
+            result += line[charIndex]
+            screenIndex += 1
+    return result
 
 if __name__ == '__main__':
     lines = []
@@ -32,7 +43,7 @@ if __name__ == '__main__':
     width = t.width()
 
     for i in range(len(lines)):
-        windows[getWindowToPutLineInto(i, height)].append(lines[i])
+        windows[getWindowToPutLineInto(i, height)].append(tabConvert(lines[i]))
 
     items = []
 
