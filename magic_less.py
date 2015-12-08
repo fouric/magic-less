@@ -10,8 +10,6 @@ def getNumWindows(lines, height):
     return max(math.ceil(len(lines) / height), 1)
 def getWindowToPutLineInto(index, height):
     return int(index / height)
-def getLinesToDisplay(lines, height, startingIndex):
-    return min(len(lines) - startingIndex, height)
 def tabConvert(line):
     result = ''
     screenIndex = 0
@@ -38,38 +36,49 @@ if __name__ == '__main__':
     width = t.width()
 
     numWindows = getNumWindows(lines, height)
-    windowIndex = 0
+    waningWindowIndex = 0
     windows = [[] for i in range(numWindows)]
     for i in range(len(lines)):
         windows[getWindowToPutLineInto(i, height)].append(tabConvert(lines[i]))
 
-    barrierIndex = 0
+    barrierIndex = -1
 
     while True:
         t.clear()
-        startingIndex = windowIndex * height
-        upper = windows[windowIndex]
-        lower = windows[windowIndex + 1 % numWindows]
-        for y in range(barrierIndex):
-            drawText(t, 0, y, lower[y])
-        drawText(t, 0, barrierIndex, '-' * width)
-        for y in range(height - barrierIndex - 1):
-            drawText(t, 0, y + barrierIndex + 1, upper[y + barrierIndex + 1])
+        waning = windows[waningWindowIndex]
+        waxing = windows[(waningWindowIndex + 1) % numWindows]
+
+        # aligned perfectly on a page
+        if barrierIndex == -1:
+            for y in range(len(waning)):
+                drawText(t, 0, y, waning[y])
+        else:
+            for y in range(barrierIndex):
+                drawText(t, 0, y, waxing[y])
+            drawText(t, 0, barrierIndex, '-' * width)
+            for y in range(min(height - barrierIndex - 1, len(waning))):
+                drawText(t, 0, y + barrierIndex + 1, waning[min(y + barrierIndex + 1, len(waning) - 1)])
         t.present()
         char = t.poll_event()
         if char[1] == 'q':
             break
         elif char[1] == 'j':
-            #windowIndex = (windowIndex + 1) % numWindows
             barrierIndex += 1
             if barrierIndex >= height:
-                windowIndex = windowIndex + 1 % numWindows
-                barrierIndex = 0
+                if waningWindowIndex + 1 < numWindows:
+                    barrierIndex = -1
+                    waningWindowIndex += 1
+                else:
+                    barrierIndex = height - 1
+            elif waningWindowIndex == numWindows - 2 and barrierIndex >= (len(waxing) - 1):
+                barrierIndex = len(waxing) - 1
         elif char[1] == 'k':
-            #windowIndex = (windowIndex - 1) % numWindows
             barrierIndex -= 1
-            if barrierIndex < 0:
-                windowIndex = windowIndex - 1 % numWindows
-                barrierIndex = height - 1
+            if barrierIndex < -1:
+                if waningWindowIndex > 0:
+                    barrierIndex = height - 1
+                    waningWindowIndex -= 1
+                else:
+                    barrierIndex = -1
 
     t.close()
